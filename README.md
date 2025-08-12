@@ -7,6 +7,7 @@ Sistema de monitoramento de vento usando ESP32 (Heltec WiFi LoRa 32 V2) com comu
 Este projeto realiza a leitura de:
 - **Velocidade do vento** (Anemômetro - Modbus ID 1)
 - **Direção do vento** (Biruta - Modbus ID 2)
+- **Display OLED** integrado para visualização dos dados em tempo real
 
 ## 🔧 Hardware
 
@@ -18,8 +19,8 @@ Este projeto realiza a leitura de:
 
 | Função | Pino ESP32 | Descrição |
 |--------|------------|-----------|
-| RX | 16 | Recepção RS485 |
-| TX | 17 | Transmissão RS485 |
+| RX | 12 | Recepção RS485 |
+| TX | 13 | Transmissão RS485 |
 | DE/RE | 2 | Controle de direção MAX485 |
 
 ## ⚙️ Configuração
@@ -42,16 +43,23 @@ Este projeto realiza a leitura de:
 
 ## 📊 Saída
 
-O sistema exibe no Serial Monitor:
+**Serial Monitor:**
 ```
 Velocidade do vento: 5.2 m/s
 Direção do vento (raw): 180
 ---
 ```
 
+**Display OLED:**
+- Título: "Monitor Vento"
+- Velocidade do vento em m/s
+- Direção do vento em graus
+- Indicação de erro para cada sensor
+
 ## 🛠️ Dependências
 
 - ModbusMaster@^2.0.1
+- Heltec ESP32 Dev-Boards@^1.1.1
 
 ## 📝 Autor
 

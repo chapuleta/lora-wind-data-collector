@@ -102,7 +102,8 @@ void setup() {
   Serial.begin(9600);
   
   // Configuração da comunicação RS485
-  Serial2.begin(9600, SERIAL_8N1, 12, 13); // RX=12, TX=13
+  // Mudado para GPIO 32/33 para evitar conflito com strapping pin GPIO12
+  Serial2.begin(9600, SERIAL_8N1, 32, 33); // RX=32, TX=33
 
   pinMode(DE_RE_PIN, OUTPUT);
   digitalWrite(DE_RE_PIN, LOW);  // Inicia em modo recepção

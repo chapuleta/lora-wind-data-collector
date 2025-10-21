@@ -2,13 +2,15 @@
 
 ## ESP32 LoRa Heltec V2 → MAX485
 
-| Pino ESP32 | → | Pino MAX485 | Cor Jumper |
-|------------|---|-------------|------------|
-| GPIO 13    | → | DI          | 🟠 Laranja |
-| GPIO 12    | → | RO          | 🟤 Marrom  |
-| GPIO 23     | → | DE e RE (juntos) | 🟡 Amarelo |
-| 3.3V       | → | VCC         | 🔴 Vermelho |
-| GND        | → | GND         | ⚫ Preto   |
+| Pino ESP32 | → | Pino MAX485 | Cor Jumper | Observação |
+|------------|---|-------------|------------|------------|
+| GPIO 33    | → | DI (TX)     | 🟠 Laranja | Mudado de GPIO 13 |
+| GPIO 32    | → | RO (RX)     | 🟤 Marrom  | Mudado de GPIO 12 |
+| GPIO 23    | → | DE e RE (juntos) | 🟡 Amarelo | Controle DE/RE |
+| 3.3V       | → | VCC         | 🔴 Vermelho | Alimentação |
+| GND        | → | GND         | ⚫ Preto   | Terra |
+
+> **Nota:** GPIOs alterados de 12/13 para 32/33 para evitar conflito com strapping pins do ESP32 durante o boot.
 
 ---
 
@@ -43,9 +45,9 @@
 
 ```
 ESP32 Emissor:
-├─ GPIO 13 ──→ MAX485 DI
-├─ GPIO 12 ──→ MAX485 RO
-├─ GPIO 2  ──→ MAX485 DE+RE
+├─ GPIO 33 ──→ MAX485 DI (TX)
+├─ GPIO 32 ──→ MAX485 RO (RX)
+├─ GPIO 23 ──→ MAX485 DE+RE
 ├─ 3.3V    ──→ MAX485 VCC
 └─ GND     ──→ MAX485 GND
               └─ Fonte Externa GND (aterramento comum)

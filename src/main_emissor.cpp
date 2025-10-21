@@ -6,10 +6,19 @@
 // === DIREÇÃO DO VENTO E ANEMÔMETRO (Modbus RS485) ===
 #include <ModbusMaster.h>
 
-#define DE_RE_PIN 2  // Pino para controlar DE e RE do MAX485
+#define DE_RE_PIN 23  // Pino para controlar DE e RE do MAX485
 
 ModbusMaster nodeAnemometro;   // Dispositivo Modbus ID 1 (velocidade do vento)
 ModbusMaster nodeBiruta;       // Dispositivo Modbus ID 2 (direção do vento)
+
+// === Estrutura de dados para transmissão ===
+struct SensorData {
+  uint32_t timestamp;
+  float windSpeed;
+  uint16_t windDirection;
+  bool anemometroOK;
+  bool birutaOK;
+};
 
 // Variáveis para armazenar os últimos valores lidos
 float lastWindSpeed = 0.0;
@@ -30,7 +39,7 @@ void updateOLED() {
   
   // Título menor
   Heltec.display->setFont(ArialMT_Plain_10);
-  Heltec.display->drawString(0, 0, "Monitor Vento");
+  Heltec.display->drawString(0, 0, "ESP1 - EMISSOR");
   
   // Linha divisória
   Heltec.display->drawHorizontalLine(0, 12, 128);
@@ -62,9 +71,32 @@ void updateOLED() {
   Heltec.display->display();
 }
 
+void sendLoRaData() {
+  SensorData data;
+  data.timestamp = millis();
+  data.windSpeed = lastWindSpeed;
+  data.windDirection = lastWindDirection;
+  data.anemometroOK = anemometroOK;
+  data.birutaOK = birutaOK;
+  
+  // Envia dados via LoRa
+  LoRa.beginPacket();
+  LoRa.write((uint8_t*)&data, sizeof(data));
+  LoRa.endPacket();
+  
+  Serial.println("Dados enviados via LoRa:");
+  Serial.printf("Timestamp: %lu\n", data.timestamp);
+  Serial.printf("Velocidade: %.1f m/s\n", data.windSpeed);
+  Serial.printf("Direção: %d graus\n", data.windDirection);
+  Serial.printf("Status: Anem=%s, Biruta=%s\n", 
+                data.anemometroOK ? "OK" : "ERRO",
+                data.birutaOK ? "OK" : "ERRO");
+  Serial.println("---");
+}
+
 void setup() {
-  // Inicializa o Heltec (OLED habilitado, LoRa desabilitado, Serial DESABILITADO)
-  Heltec.begin(true /*DisplayEnable*/, false /*LoRa*/, false /*Serial*/, true /*PABOOST*/, 470E6 /*Band*/);
+  // Inicializa o Heltec (OLED habilitado, LoRa HABILITADO, Serial DESABILITADO)
+  Heltec.begin(true /*DisplayEnable*/, true /*LoRa*/, false /*Serial*/, true /*PABOOST*/, 470E6 /*Band*/);
   
   // Configura o Serial manualmente
   Serial.begin(9600);
@@ -85,12 +117,12 @@ void setup() {
   nodeBiruta.preTransmission(preTransmission);
   nodeBiruta.postTransmission(postTransmission);
 
-  Serial.println("Sistema de leitura Biruta e Anemômetro inicializado");
+  Serial.println("ESP1 - EMISSOR LoRa inicializado");
   
   // Tela inicial
   Heltec.display->clear();
   Heltec.display->setFont(ArialMT_Plain_10);
-  Heltec.display->drawString(0, 0, "Monitor Vento");
+  Heltec.display->drawString(0, 0, "ESP1 - EMISSOR");
   Heltec.display->setFont(ArialMT_Plain_10);
   Heltec.display->drawString(0, 15, "Inicializando...");
   Heltec.display->display();
@@ -131,6 +163,12 @@ void loop() {
   // Atualiza o display OLED
   updateOLED();
 
-  Serial.println("---"); // Separador para facilitar leitura
+  // Envia dados via LoRa a cada 5 segundos
+  static unsigned long lastLoRaTransmission = 0;
+  if (millis() - lastLoRaTransmission > 5000) {
+    sendLoRaData();
+    lastLoRaTransmission = millis();
+  }
+
   delay(1000);
 }
